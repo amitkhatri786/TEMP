@@ -32,9 +32,9 @@ void heapify_down(int arr[],int n,int i)
 	int l = 2*i+1;
 	int r = 2*i+2;
 	int t;
-	if(l<n && my_cmp(l,largest))
+	if(l<n && my_cmp(arr[l],arr[largest]))
 		largest = l;
-	if(r<n && my_cmp(r,largest))
+	if(r<n && my_cmp(arr[r],arr[largest]))
 		largest = r;
 	if(i!=largest) {
 		t = arr[largest];
@@ -50,8 +50,8 @@ void heapify_up(int arr[],int n,int i)
 {
 	int parent = (i-1)/2;
 	int t;
-	if (i) {
-		if (my_cmp(i, parent)) {
+	if (parent>=0) {
+		if (my_cmp(arr[i], arr[parent])) {
 			t = arr[parent];
 			arr[parent] = arr[i];
 			arr[i] = t;
@@ -64,14 +64,14 @@ void heapify_up(int arr[],int n,int i)
 
 void insert_article(int sec_id,int article_id)
 {
-		data[article_id-1].article_id = article_id;
-		data[article_id-1].section_id = sec_id;
-		data[article_id-1].is_deleted = 0;
-		data[article_id-1].point = 0;
-		data[article_id-1].heap_index = max_heap_size;
+		data[article_id].article_id = article_id;
+		data[article_id].section_id = sec_id;
+		data[article_id].is_deleted = 0;
+		data[article_id].point = 0;
+		data[article_id].heap_index = max_heap_size;
 		total_article++;
 
-		max_heap[max_heap_size] = article_id-1;
+		max_heap[max_heap_size] = article_id;
 		max_heap_size++;
 		heapify_up(max_heap,max_heap_size,max_heap_size-1);
 }
@@ -85,19 +85,21 @@ void print_array(int arr[],int n)
 
 void erase_article(int article_id)
 {
-	int heap_index = data[article_id-1].heap_index;
+	int heap_index = data[article_id].heap_index;
 	int parent = (heap_index-1)/2;
 	max_heap[heap_index] = max_heap[max_heap_size-1];
-	data[max_heap[heap_index]].heap_index = max_heap_size-1;
+	data[max_heap[max_heap_size-1]].heap_index = heap_index;
 	max_heap_size--;
-	data[article_id-1].is_deleted = 1;
+	data[article_id].is_deleted = 1;
 	
-	if(parent) {
-		if(my_cmp(parent,heap_index))
-			heapify_up(max_heap,max_heap_size,heap_index);
-		else
+	if(parent>0) {
+		if(my_cmp(max_heap[parent],max_heap[heap_index]))
 			heapify_down(max_heap,max_heap_size,heap_index);
+		else
+			heapify_up(max_heap,max_heap_size,heap_index);
 	}
+	if(parent==0)
+		heapify_down(max_heap,max_heap_size,heap_index);
 }
 
 int main()
@@ -111,8 +113,18 @@ int main()
 	insert_article(1,7);
 	insert_article(2,8);
 	print_array(max_heap,max_heap_size);
-	erase_article(5);
-	printf("After erase\n");
+	erase_article(6);
+	printf("After erase 6\n");
+	print_array(max_heap,max_heap_size);
+	insert_article(2,9);
+	insert_article(2,10);
+	printf("After 2 more insert 9 10\n");
+	print_array(max_heap,max_heap_size);
+	erase_article(10);
+	printf("After erase 10\n");
+	print_array(max_heap,max_heap_size);
+	erase_article(4);
+	printf("After erase 4\n");
 	print_array(max_heap,max_heap_size);
 	return(0);
 }
